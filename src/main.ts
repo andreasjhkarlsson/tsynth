@@ -34,11 +34,10 @@ interface Effect
 
 class TremoloEffect
 {
-    rate: number
     private counter: number = 0
 
-    constructor(rate: number) {
-        this.rate = rate
+    constructor(private rate: number)
+    {
     }
 
     run(sample: number): number
@@ -97,7 +96,7 @@ class Device
 
         this.startTime = BigInt(0);
 
-        this.effects = [new TremoloEffect(0.0005), new DelayEffect(0.7)];
+        this.effects = [new TremoloEffect(0.0005)/*, new DelayEffect(0.7)*/];
     }
 
     start()
@@ -285,7 +284,7 @@ function play(sheet:Array<Source>, speed: number)
     }
 }
 
-play(sheet, 125);
+play(sheet, 440);
 
 // Create a screen object.
 let screen = blessed.screen({
