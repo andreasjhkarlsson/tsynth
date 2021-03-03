@@ -5,6 +5,7 @@ import Speaker from "speaker";
 import {Readable} from "stream"
 import {hrtime} from "process"
 import { exception } from "console";
+import * as blessed from "blessed";
 
 // Time in seconds -> sample between -1.0 and 1.0
 type Source = (time: number) => number;
@@ -234,4 +235,42 @@ function play(sheet:Array<Source>, speed: number)
     }
 }
 
-play(sheet, 400);
+play(sheet, 125);
+
+// Create a screen object.
+let screen = blessed.screen({
+    smartCSR: true
+  });
+
+// Quit on Escape, q, or Control-C.
+screen.key(['escape', 'q', 'C-c'], function(ch, key) {
+    return process.exit(0);
+  });
+
+
+let keyMap: { [key:string]:string; } = {
+    "z": "c",
+    "s": "c#",
+    "x": "d",
+    "d": "d#",
+    "c": "e",
+    "v": "f",
+    "g": "f#",
+    "b": "g",
+    "h": "g#",
+    "n": "a" ,
+    "j": "a#",
+    "m": "b"
+};
+
+
+
+screen.key(Object.keys(keyMap), function (ch, key) {
+    let source = octaves[2](keyMap[ch]);
+    device.addSource(source, 2.0);
+});
+  
+
+  
+// Render the screen.
+screen.render();
