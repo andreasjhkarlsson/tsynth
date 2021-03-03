@@ -11,7 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "speaker": "^0.5.2"
+    "speaker": "file:deps/node-speaker"
   },
   "devDependencies": {
     "@types/node": "^14.14.31",

@@ -55,11 +55,8 @@ class Device
     start()
     {
         this.startTime = hrtime.bigint();
-        
-        // Start device with one second delay to make sure it doesn't gobble up our samples
-        setTimeout(() => {
-            this.buffer.pipe(this.speaker);
-        }, 1000);
+
+        this.buffer.pipe(this.speaker);
     }
 
     private generateSample()

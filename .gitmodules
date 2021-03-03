@@ -1,0 +1,3 @@
+[submodule "deps/node-speaker"]
+	path = deps/node-speaker
+	url = https://github.com/andreasjhkarlsson/node-speaker.git
