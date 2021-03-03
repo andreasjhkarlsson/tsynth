@@ -27,6 +27,50 @@ class ActiveSource
     }
 }
 
+interface Effect
+{
+    run(sample: number): number
+}
+
+class TremoloEffect
+{
+    rate: number
+    private counter: number = 0
+
+    constructor(rate: number) {
+        this.rate = rate
+    }
+
+    run(sample: number): number
+    {
+        this.counter += this.rate
+        var multiplier = Math.sin(this.counter)
+        return sample * multiplier
+    }
+}
+
+class DelayEffect
+{
+    seconds: number
+    private buffer: number[] = []
+
+    constructor(seconds: number) {
+        this.seconds = seconds
+    }
+
+    run(sample: number): number
+    {
+        this.buffer.unshift(sample)
+        if (this.buffer.length > 44100 * this.seconds) {
+            var delayed = this.buffer.pop()
+            if (delayed) {
+                return sample + delayed / 1.5
+            }
+        }
+        return sample
+    }
+}
+
 class Device
 {
     speaker: Speaker;
@@ -34,23 +78,26 @@ class Device
     totalSamples: number;
     activeSources: ActiveSource[];
     startTime: bigint;
+    effects: Effect[];
 
     constructor(private sampleRate: number, private chunkSize: number)
     {
         this.speaker = new Speaker({
             channels: 1,
             bitDepth: 16,
-            sampleRate: sampleRate,    
+            sampleRate: sampleRate,
             lowWaterMark: chunkSize,
             highWaterMark: chunkSize*2});
 
         this.activeSources = new Array<ActiveSource>();
-        
+
         this.totalSamples = 0;
 
         this.buffer = new Readable({read: () => this.pushPCM()});
 
         this.startTime = BigInt(0);
+
+        this.effects = [new TremoloEffect(0.0005), new DelayEffect(0.7)];
     }
 
     start()
@@ -69,6 +116,10 @@ class Device
                 sample += activeSource.nextSample();
         }
 
+        for (let effect of this.effects) {
+            sample = effect.run(sample)
+        }
+
         // Clip
         if (sample > 0.9)
             sample = 0.9;
@@ -79,7 +130,6 @@ class Device
         this.activeSources = this.activeSources.filter((as) => as.stopAt > tis);
 
         this.totalSamples++;
-
         return sample;
     }
 
@@ -112,7 +162,7 @@ class Device
             let sample = this.generateSample();
             chunk.writeInt16LE(f2i(sample), s*2);
         }
-        this.buffer.push(chunk); 
+        this.buffer.push(chunk);
     }
 }
 
@@ -129,12 +179,12 @@ function square(f: number, a: number): Source
             return 1.0 * a;
         else
             return -1.0 * a;
-    };    
+    };
 }
 
 function sine(f: number, a: number): Source
 {
-    return t => Math.sin(t * f) * a;   
+    return t => Math.sin(t * f) * a;
 }
 
 function mix3(s1: Source,s2: Source,s3: Source): Source
