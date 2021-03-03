@@ -1,7 +1,7 @@
 # tsynth
 Simple synthesizer
 
-# Build & run
+### Build & run
 $ npm install
 
 $ npm run build
